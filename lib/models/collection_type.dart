@@ -1,7 +1,5 @@
 // Collection Type
 
-import 'package:media_collection_app/models/media_item.dart';
-
 class CollectionType {
   final String id;
   final String name;

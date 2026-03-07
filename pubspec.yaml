@@ -1,5 +1,5 @@
-name: media_collection_app
-description: "Project for CS4750"
+name: media_shelf
+description: "A mobile app to catalogue physical media collections — CDs, DVDs, books, and any custom collection types you create. Built with Flutter & Dart."
 
 publish_to: 'none'
 
@@ -13,6 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.2
+  sqflite: ^2.3.3
+  path: ^1.9.0
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
