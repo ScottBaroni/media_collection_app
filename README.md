@@ -1,16 +1,13 @@
-# media_collection_app
+# MediaShelf
 
-Project for CS4750
+A mobile app to catalogue physical media collections — CDs, DVDs, books, and any custom collection types you create. Built with Flutter & Dart.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Build Phases
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [x] Phase 1 — Data models
+- [ ] Phase 2 — State management (Provider)
+- [ ] Phase 3 — Local database (SQLite)
+- [ ] Phase 4 — Core screens & navigation
+- [ ] Phase 5 — Extra features (barcode, import/export, themes, sync)
