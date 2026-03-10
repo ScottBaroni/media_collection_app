@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
 import '../models/media_item.dart';
 import '../models/collection_type.dart';
+import 'add_item_screen.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
@@ -22,14 +23,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CollectionProvider>();
-
-    // Show spinner while loading from database
-    if (provider.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     final filtered = _filteredItems(provider.items);
 
     return Scaffold(
@@ -42,7 +35,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: provider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
         children: [
           // Filter Chips
           _FilterBar(
@@ -73,7 +68,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {}, // TODO: add item
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddItemScreen()),
+        ),
         child: const Icon(Icons.add_rounded),
       ),
     );
@@ -121,6 +119,8 @@ class _FilterBar extends StatelessWidget {
     );
   }
 }
+
+// Chip
 
 class _Chip extends StatelessWidget {
   final String label;
@@ -187,7 +187,6 @@ class _MediaCard extends StatelessWidget {
                   ? Image.file(
                 width: double.infinity,
                 fit: BoxFit.cover,
-                // Handle this properly later with image picking
                 Uri.file(item.imagePath!).toFilePath() as dynamic,
               )
                   : _PlaceholderArt(collectionTypeId: item.collectionTypeId),
@@ -253,10 +252,14 @@ class _PlaceholderArt extends StatelessWidget {
 
   String get _emoji {
     switch (collectionTypeId) {
-      case 'cds': return '💿';
-      case 'dvds': return '📀';
-      case 'books': return '📖';
-      default: return '🗂️';
+      case 'cds':
+        return '💿';
+      case 'dvds':
+        return '📀';
+      case 'books':
+        return '📖';
+      default:
+        return '🗂️';
     }
   }
 

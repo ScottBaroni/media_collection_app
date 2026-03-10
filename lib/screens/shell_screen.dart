@@ -11,18 +11,18 @@ class ShellScreen extends StatefulWidget {
 class _ShellScreenState extends State<ShellScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const CollectionScreen(), // Collection
-    const Placeholder(), // Stats
-    const Placeholder(), // Profile
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const CollectionScreen(),
+      const Placeholder(),
+      const Placeholder(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

@@ -17,14 +17,19 @@ class CollectionProvider extends ChangeNotifier {
 
   // Init
   Future<void> loadData() async {
+    print('--- loadData called ---');
     _isLoading = true;
     notifyListeners();
 
     _collectionTypes = await DatabaseService.instance.getCollectionTypes();
+    print('--- got ${_collectionTypes.length} types ---');
     _items = await DatabaseService.instance.getItems();
+    print('--- got ${_items.length} items ---');
 
     _isLoading = false;
+    print('--- isLoading set to false ---');
     notifyListeners();
+    print('--- notifyListeners called ---');
   }
 
   // Items

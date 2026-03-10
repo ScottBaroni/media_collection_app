@@ -8,6 +8,6 @@ A mobile app to catalogue physical media collections — CDs, DVDs, books, and a
 - [x] Phase 1 — Data models
 - [x] Phase 2 — State management (Provider)
 - [x] Phase 3 — Local database (SQLite)
-- [ ] Phase 4 — Navigation shell
+- [x] Phase 4 — Navigation shell
 - [ ] Phase 5 — Core screens (collection, stats, profile)
 - [ ] Phase 6 — Extra features (barcode, import/export, themes, sync)
