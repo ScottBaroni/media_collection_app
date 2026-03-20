@@ -67,4 +67,44 @@ class CollectionProvider extends ChangeNotifier {
     _items.removeWhere((item) => item.collectionTypeId == id);
     notifyListeners();
   }
+
+  // Stats
+
+  int get totalItems => _items.length;
+
+  // Collection Type Stat
+  Map<String, int> get countByType {
+    final map = <String, int>{};
+    for (final item in _items) {
+      map[item.collectionTypeId] = (map[item.collectionTypeId] ?? 0) + 1;
+    }
+    return map;
+  }
+  // Top Genre Stat
+  Map<String, int> get topGenres {
+    final map = <String, int>{};
+    for (final item in _items) {
+      if (item.genre != null) {
+        map[item.genre!] = (map[item.genre!] ?? 0) + 1;
+      }
+    }
+    final sorted = map.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    return Map.fromEntries(sorted.take(5));
+  }
+  // Top Decade Stat
+  Map<String, int> get countByDecade {
+    final map = <String, int>{};
+    for (final item in _items) {
+      final decade = '${(item.year ~/ 10) * 10}s';
+      map[decade] = (map[decade] ?? 0) + 1;
+    }
+    final sorted = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    return Map.fromEntries(sorted);
+  }
+  // Recently Added Items
+  List<MediaItem> get recentItems {
+    final sorted = List<MediaItem>.from(_items)
+      ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
+    return sorted.take(5).toList();
+  }
 }
