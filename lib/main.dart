@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/collection_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/shell_screen.dart';
 
 void main() {
@@ -12,17 +13,18 @@ class MediaShelfApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) =>
-      CollectionProvider()
-        ..loadData(),
-      child: MaterialApp(
-        title: 'MediaShelf',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CollectionProvider()..loadData()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+      ],
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, _) => MaterialApp(
+          title: 'MediaShelf',
+          debugShowCheckedModeBanner: false,
+          theme: settings.themeData,
+          home: const ShellScreen(),
         ),
-        home: const ShellScreen(),
       ),
     );
   }

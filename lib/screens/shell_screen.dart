@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'collection_screen.dart';
 import 'stats_screen.dart';
+import 'profile_screen.dart';
 
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key});
@@ -17,7 +18,7 @@ class _ShellScreenState extends State<ShellScreen> {
     final screens = [
       const CollectionScreen(),
       const StatsScreen(),
-      const Placeholder(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
