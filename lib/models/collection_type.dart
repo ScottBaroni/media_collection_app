@@ -18,4 +18,13 @@ class CollectionType {
     CollectionType(id: 'dvds',    name: 'DVDs',   iconName: 'movie'),
     CollectionType(id: 'books',   name: 'Books',  iconName: 'menu_book'),
   ];
+
+  String get emoji {
+    switch (iconName) {
+      case 'album': return '💿';
+      case 'movie': return '📀';
+      case 'menu_book': return '📚';
+      default: return '🗂️';
+    }
+  }
 }

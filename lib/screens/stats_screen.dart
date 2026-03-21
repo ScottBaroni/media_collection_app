@@ -104,7 +104,7 @@ class _OverviewCards extends StatelessWidget {
       ...provider.collectionTypes.map((type) => (
       type.name,
       countByType[type.id] ?? 0,
-      type.iconName,
+      type.emoji,
       )),
     ];
 
