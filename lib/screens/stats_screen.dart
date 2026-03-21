@@ -11,57 +11,65 @@ class StatsScreen extends StatelessWidget {
     final provider = context.watch<CollectionProvider>();
 
     if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (provider.totalItems == 0) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('📊', style: TextStyle(fontSize: 64)),
-            SizedBox(height: 16),
-            Text(
-              'No stats yet',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-            SizedBox(height: 8),
-            Text('Add some items to see your stats'),
-          ],
+      return Scaffold(
+        appBar: AppBar(title: const Text('Stats')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('📊', style: TextStyle(fontSize: 64)),
+              SizedBox(height: 16),
+              Text(
+                'No stats yet',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              SizedBox(height: 8),
+              Text('Add some items to see your stats'),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Overview
-        _SectionHeader('Overview'),
-        const SizedBox(height: 12),
-        _OverviewCards(provider: provider),
-        const SizedBox(height: 24),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Stats')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Overview
+          _SectionHeader('Overview'),
+          const SizedBox(height: 12),
+          _OverviewCards(provider: provider),
+          const SizedBox(height: 24),
 
-        // Top Genres
-        _SectionHeader('Top Genres'),
-        const SizedBox(height: 12),
-        provider.topGenres.isEmpty
-            ? _EmptySection('No genre data yet')
-            : _BarChart(data: provider.topGenres),
-        const SizedBox(height: 24),
+          // Top Genres
+          _SectionHeader('Top Genres'),
+          const SizedBox(height: 12),
+          provider.topGenres.isEmpty
+              ? _EmptySection('No genre data yet')
+              : _BarChart(data: provider.topGenres),
+          const SizedBox(height: 24),
 
-        // By Decade
-        _SectionHeader('By Decade'),
-        const SizedBox(height: 12),
-        provider.countByDecade.isEmpty
-            ? _EmptySection('No decade data yet')
-            : _BarChart(data: provider.countByDecade),
-        const SizedBox(height: 24),
+          // By Decade
+          _SectionHeader('By Decade'),
+          const SizedBox(height: 12),
+          provider.countByDecade.isEmpty
+              ? _EmptySection('No decade data yet')
+              : _BarChart(data: provider.countByDecade),
+          const SizedBox(height: 24),
 
-        // Recently Added
-        _SectionHeader('Recently Added'),
-        const SizedBox(height: 12),
-        _RecentList(items: provider.recentItems, provider: provider),
-      ],
+          // Recently Added
+          _SectionHeader('Recently Added'),
+          const SizedBox(height: 12),
+          _RecentList(items: provider.recentItems, provider: provider),
+        ],
+      ),
     );
   }
 }
@@ -299,7 +307,10 @@ class _RecentList extends StatelessWidget {
                   height: 1,
                   indent: 72,
                   endIndent: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.15),
                 ),
             ],
           );

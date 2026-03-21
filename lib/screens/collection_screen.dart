@@ -4,6 +4,7 @@ import '../providers/collection_provider.dart';
 import '../models/media_item.dart';
 import '../models/collection_type.dart';
 import 'add_item_screen.dart';
+import 'item_detail_screen.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
@@ -171,7 +172,10 @@ class _MediaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {}, // TODO: item detail
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ItemDetailScreen(itemId: item.id)),
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
