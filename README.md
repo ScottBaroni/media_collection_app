@@ -11,7 +11,9 @@ A mobile app to catalogue physical media collections — CDs, DVDs, books, and a
 - [x] Phase 4 — Navigation shell
 - [x] Phase 5 — Core screens (collection, stats, profile)
 - [x] Phase 6 — Item detail screen & editing
+- [x] v1.0.0 submitted to Google Play!
 - [ ] Phase 7 — Stats filtering by collection type
-- [ ] Phase 8 — Barcode scanning
-- [ ] Phase 9 — Spreadsheet import
-- [ ] Phase 10 — Additional themes
+- [ ] Phase 8 — Custom collection types
+- [ ] Phase 9 — Barcode scanning
+- [ ] Phase 10 — Spreadsheet import
+- [ ] Phase 11 — Additional themes
