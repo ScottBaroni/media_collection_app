@@ -3,8 +3,15 @@ import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
 import '../models/media_item.dart';
 
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
+
+  @override
+  State<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends State<StatsScreen> {
+  Set<String> _selectedTypeIds = {};
 
   @override
   Widget build(BuildContext context) {
@@ -37,54 +44,123 @@ class StatsScreen extends StatelessWidget {
       );
     }
 
+    // Compute filtered stats
+    final filteredCount = _selectedTypeIds.isEmpty
+        ? provider.totalItems
+        : provider.filteredItems(_selectedTypeIds).length;
+    final countByType = provider.filteredCountByType(_selectedTypeIds);
+    final topGenres = provider.filteredTopGenres(_selectedTypeIds);
+    final countByDecade = provider.filteredCountByDecade(_selectedTypeIds);
+    final recentItems = provider.filteredRecentItems(_selectedTypeIds);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Stats')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+
+          // Filter Chips
+          _FilterBar(
+            collectionTypes: provider.collectionTypes,
+            selectedTypeIds: _selectedTypeIds,
+            onToggle: (id) {
+              setState(() {
+                if (_selectedTypeIds.contains(id)) {
+                  _selectedTypeIds = Set.from(_selectedTypeIds)..remove(id);
+                } else {
+                  _selectedTypeIds = Set.from(_selectedTypeIds)..add(id);
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 20),
+
           // Overview
           _SectionHeader('Overview'),
           const SizedBox(height: 12),
-          _OverviewCards(provider: provider),
+          _OverviewCards(
+            provider: provider,
+            selectedTypeIds: _selectedTypeIds,
+            filteredCount: filteredCount,
+            countByType: countByType,
+          ),
           const SizedBox(height: 24),
 
           // Top Genres
           _SectionHeader('Top Genres'),
           const SizedBox(height: 12),
-          provider.topGenres.isEmpty
-              ? _EmptySection('No genre data yet')
-              : _BarChart(data: provider.topGenres),
+          topGenres.isEmpty
+              ? _EmptySection('No genre data for selection')
+              : _BarChart(data: topGenres),
           const SizedBox(height: 24),
 
           // By Decade
           _SectionHeader('By Decade'),
           const SizedBox(height: 12),
-          provider.countByDecade.isEmpty
-              ? _EmptySection('No decade data yet')
-              : _BarChart(data: provider.countByDecade),
+          countByDecade.isEmpty
+              ? _EmptySection('No decade data for selection')
+              : _BarChart(data: countByDecade),
           const SizedBox(height: 24),
 
           // Recently Added
           _SectionHeader('Recently Added'),
           const SizedBox(height: 12),
-          _RecentList(items: provider.recentItems, provider: provider),
+          _RecentList(items: recentItems, provider: provider),
         ],
       ),
     );
   }
 }
 
-// Section Header
+// Filter Bar
 
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  const _SectionHeader(this.title);
+class _FilterBar extends StatelessWidget {
+  final List<dynamic> collectionTypes;
+  final Set<String> selectedTypeIds;
+  final ValueChanged<String> onToggle;
+
+  const _FilterBar({
+    required this.collectionTypes,
+    required this.selectedTypeIds,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+    final color = Theme.of(context).colorScheme.primary;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: collectionTypes.map((type) {
+          final isSelected = selectedTypeIds.contains(type.id);
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => onToggle(type.id),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? color : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? color : Colors.grey.withValues(alpha: 0.4),
+                    width: 1.5,
+                  ),
+                ),
+                child: Text(
+                  type.name,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? Colors.white : null,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
@@ -93,15 +169,33 @@ class _SectionHeader extends StatelessWidget {
 
 class _OverviewCards extends StatelessWidget {
   final CollectionProvider provider;
-  const _OverviewCards({required this.provider});
+  final Set<String> selectedTypeIds;
+  final int filteredCount;
+  final Map<String, int> countByType;
+
+  const _OverviewCards({
+    required this.provider,
+    required this.selectedTypeIds,
+    required this.filteredCount,
+    required this.countByType,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final countByType = provider.countByType;
+    // Which types to show cards for
+    final typesToShow = selectedTypeIds.isEmpty
+        ? provider.collectionTypes
+        : provider.collectionTypes
+        .where((t) => selectedTypeIds.contains(t.id))
+        .toList();
 
     final cards = [
-      ('Total', provider.totalItems, '🗂️'),
-      ...provider.collectionTypes.map((type) => (
+      (
+      selectedTypeIds.isEmpty ? 'Total' : 'Selected Total',
+      filteredCount,
+      '🗂️'
+      ),
+      ...typesToShow.map((type) => (
       type.name,
       countByType[type.id] ?? 0,
       type.emoji,
@@ -150,6 +244,21 @@ class _OverviewCards extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+// Section Header
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
     );
   }
 }
@@ -262,7 +371,6 @@ class _RecentList extends StatelessWidget {
           final index = entry.key;
           final item = entry.value;
           final isLast = index == items.length - 1;
-
           return Column(
             children: [
               ListTile(
@@ -283,9 +391,7 @@ class _RecentList extends StatelessWidget {
                 title: Text(
                   item.title,
                   style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                      fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   item.creator,

@@ -107,4 +107,49 @@ class CollectionProvider extends ChangeNotifier {
       ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
     return sorted.take(5).toList();
   }
+
+  // Filtering Stats
+  List<MediaItem> filteredItems(Set<String> typeIds) {
+    if (typeIds.isEmpty) return _items;
+    return _items.where((item) => typeIds.contains(item.collectionTypeId)).toList();
+  }
+
+  Map<String, int> filteredCountByType(Set<String> typeIds) {
+    final source = filteredItems(typeIds);
+    final map = <String, int>{};
+    for (final item in source) {
+      map[item.collectionTypeId] = (map[item.collectionTypeId] ?? 0) + 1;
+    }
+    return map;
+  }
+
+  Map<String, int> filteredTopGenres(Set<String> typeIds) {
+    final source = filteredItems(typeIds);
+    final map = <String, int>{};
+    for (final item in source) {
+      if (item.genre != null) {
+        map[item.genre!] = (map[item.genre!] ?? 0) + 1;
+      }
+    }
+    final sorted = map.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    return Map.fromEntries(sorted.take(5));
+  }
+
+  Map<String, int> filteredCountByDecade(Set<String> typeIds) {
+    final source = filteredItems(typeIds);
+    final map = <String, int>{};
+    for (final item in source) {
+      final decade = '${(item.year ~/ 10) * 10}s';
+      map[decade] = (map[decade] ?? 0) + 1;
+    }
+    final sorted = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    return Map.fromEntries(sorted);
+  }
+
+  List<MediaItem> filteredRecentItems(Set<String> typeIds) {
+    final source = filteredItems(typeIds);
+    final sorted = List<MediaItem>.from(source)
+      ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
+    return sorted.take(5).toList();
+  }
 }
