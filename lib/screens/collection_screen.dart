@@ -62,7 +62,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
               ),
               itemCount: filtered.length,
               itemBuilder: (context, index) {
-                return _MediaCard(item: filtered[index]);
+                final item = filtered[index];
+                final type = provider.collectionTypes.firstWhere(
+                      (t) => t.id == item.collectionTypeId,
+                  orElse: () => CollectionType(id: '', name: 'Unknown', iconName: '🗂️'),
+                );
+                return _MediaCard(item: item, typeName: type.name, typeEmoji: type.emoji);
               },
             ),
           ),
@@ -167,7 +172,9 @@ class _Chip extends StatelessWidget {
 
 class _MediaCard extends StatelessWidget {
   final MediaItem item;
-  const _MediaCard({required this.item});
+  final String typeName;
+  final String typeEmoji;
+  const _MediaCard({required this.item, required this.typeName, required this.typeEmoji});
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +200,7 @@ class _MediaCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 Uri.file(item.imagePath!).toFilePath() as dynamic,
               )
-                  : _PlaceholderArt(collectionTypeId: item.collectionTypeId),
+                  : _PlaceholderArt(emoji: typeEmoji),
             ),
 
             // Info
@@ -203,7 +210,7 @@ class _MediaCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.collectionTypeId.toUpperCase(),
+                    typeName.toUpperCase(),
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -251,21 +258,8 @@ class _MediaCard extends StatelessWidget {
 // Placeholder Art
 
 class _PlaceholderArt extends StatelessWidget {
-  final String collectionTypeId;
-  const _PlaceholderArt({required this.collectionTypeId});
-
-  String get _emoji {
-    switch (collectionTypeId) {
-      case 'cds':
-        return '💿';
-      case 'dvds':
-        return '📀';
-      case 'books':
-        return '📖';
-      default:
-        return '🗂️';
-    }
-  }
+  final String emoji; // changed from collectionTypeId
+  const _PlaceholderArt({required this.emoji}); // changed
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +267,7 @@ class _PlaceholderArt extends StatelessWidget {
       width: double.infinity,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Text(_emoji, style: const TextStyle(fontSize: 48)),
+        child: Text(emoji, style: const TextStyle(fontSize: 48)),
       ),
     );
   }

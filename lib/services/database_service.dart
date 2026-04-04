@@ -158,4 +158,18 @@ class DatabaseService {
     final db = await database;
     await db.delete('media_items', where: 'id = ?', whereArgs: [id]);
   }
+
+  // Collection Type
+  Future<void> updateCollectionType(CollectionType type) async {
+    final db = await database;
+    await db.update(
+      'collection_types',
+      {
+        'name': type.name,
+        'icon_name': type.iconName,
+      },
+      where: 'id = ?',
+      whereArgs: [type.id],
+    );
+  }
 }

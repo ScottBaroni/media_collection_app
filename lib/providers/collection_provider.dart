@@ -152,4 +152,13 @@ class CollectionProvider extends ChangeNotifier {
       ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
     return sorted.take(5).toList();
   }
+
+  Future<void> updateCollectionType(CollectionType updated) async {
+    await DatabaseService.instance.updateCollectionType(updated);
+    final index = _collectionTypes.indexWhere((t) => t.id == updated.id);
+    if (index != -1) {
+      _collectionTypes[index] = updated;
+      notifyListeners();
+    }
+  }
 }

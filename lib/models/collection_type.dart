@@ -24,7 +24,7 @@ class CollectionType {
       case 'album': return '💿';
       case 'movie': return '📀';
       case 'menu_book': return '📚';
-      default: return '🗂️';
+      default: return iconName; // for custom types, iconName IS the emoji
     }
   }
 }

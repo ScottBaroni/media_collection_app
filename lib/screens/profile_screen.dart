@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/collection_provider.dart';
+import 'create_collection_screen.dart';
+import 'manage_collections_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -85,12 +87,18 @@ class ProfileScreen extends StatelessWidget {
               _SettingsItem(
                 icon: Icons.add_circle_outline_rounded,
                 label: 'Create New Collection Type',
-                onTap: () {}, // TODO
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateCollectionScreen()),
+                ),
               ),
               _SettingsItem(
                 icon: Icons.edit_outlined,
                 label: 'Manage Collection Types',
-                onTap: () {}, // TODO
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ManageCollectionsScreen()),
+                ),
               ),
             ],
           ),
