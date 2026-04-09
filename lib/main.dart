@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'providers/collection_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/shell_screen.dart';
+import 'screens/auth_gate.dart';
 
 void main() async {
   // Firebase
@@ -27,7 +28,7 @@ class MediaShelfApp extends StatelessWidget {
           title: 'MediaShelf',
           debugShowCheckedModeBanner: false,
           theme: settings.themeData,
-          home: const ShellScreen(),
+          home: const AuthGate(),
         ),
       ),
     );

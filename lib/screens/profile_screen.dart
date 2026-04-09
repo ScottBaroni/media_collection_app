@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/settings_provider.dart';
 import '../providers/collection_provider.dart';
 import 'create_collection_screen.dart';
@@ -121,6 +122,26 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.download_outlined,
                 label: 'Export Collection',
                 onTap: () {}, // TODO
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Account
+          const Text(
+            'Account',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          _SettingsGroup(
+            items: [
+              _SettingsItem(
+                icon: Icons.logout_rounded,
+                label: 'Sign Out',
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                },
+                isDestructive: true,
               ),
             ],
           ),
