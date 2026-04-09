@@ -14,7 +14,8 @@ A mobile app to catalogue physical media collections — CDs, DVDs, books, and a
 - [x] v1.0.0 submitted to Google Play!
 - [x] Phase 7 — Stats filtering by collection type
 - [x] Phase 8 — Custom collection types
-- [ ] Phase 9 — Firebase integration
-- [ ] Phase 10 — Barcode scanning
-- [ ] Phase 11 — Spreadsheet import
-- [ ] Phase 12 — Additional themes
+- [ ] Phase 9 — Firebase Auth (accounts/login)
+- [ ] Phase 10 — Firestore (cloud sync)
+- [ ] Phase 11 — Barcode scanning
+- [ ] Phase 12 — Spreadsheet import
+- [ ] Phase 13 — Additional themes

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1006889406765",
+    "project_id": "mediashelf-bb679",
+    "storage_bucket": "mediashelf-bb679.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006889406765:android:bd83a922738607e7b883a4",
+        "android_client_info": {
+          "package_name": "com.scottbaroni.media_collection_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABno_Pz7bNv3qVja7XWqz9qS0zgY-DY_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
