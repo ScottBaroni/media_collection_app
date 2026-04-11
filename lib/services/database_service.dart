@@ -172,4 +172,10 @@ class DatabaseService {
       whereArgs: [type.id],
     );
   }
+
+  Future<void> clearLocalData() async {
+    final db = await database;
+    await db.delete('media_items');
+    await db.delete('collection_types');
+  }
 }

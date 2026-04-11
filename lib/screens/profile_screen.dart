@@ -139,6 +139,7 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 label: 'Sign Out',
                 onTap: () async {
+                  await context.read<CollectionProvider>().clearData();
                   await FirebaseAuth.instance.signOut();
                 },
                 isDestructive: true,

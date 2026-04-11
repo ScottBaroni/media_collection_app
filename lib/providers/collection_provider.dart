@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../models/media_item.dart';
-import '../../models/collection_type.dart';
-import '../../services/database_service.dart';
+import '../models/media_item.dart';
+import '../models/collection_type.dart';
+import '../services/database_service.dart';
+import '../services/firestore_service.dart';
 
 class CollectionProvider extends ChangeNotifier {
 
@@ -17,30 +18,77 @@ class CollectionProvider extends ChangeNotifier {
 
   // Init
   Future<void> loadData() async {
-    print('--- loadData called ---');
     _isLoading = true;
     notifyListeners();
 
-    _collectionTypes = await DatabaseService.instance.getCollectionTypes();
-    print('--- got ${_collectionTypes.length} types ---');
-    _items = await DatabaseService.instance.getItems();
-    print('--- got ${_items.length} items ---');
+    // Always sync from Firestore on login to ensure correct user data
+    await _syncFromFirestore();
 
     _isLoading = false;
-    print('--- isLoading set to false ---');
     notifyListeners();
-    print('--- notifyListeners called ---');
+  }
+
+  Future<void> _syncFromFirestore() async {
+    try {
+      final data = await FirestoreService.instance.fetchAll();
+
+      if (data.types.isNotEmpty) {
+        await DatabaseService.instance.clearLocalData();
+        for (final type in data.types) {
+          await DatabaseService.instance.insertCollectionType(type);
+        }
+        for (final item in data.items) {
+          await DatabaseService.instance.insertItem(item);
+        }
+        _collectionTypes = data.types;
+        _items = data.items;
+      } else {
+        // Check if this is truly a new user or just a slow connection
+        // Wait briefly and retry once
+        await Future.delayed(const Duration(seconds: 2));
+        final retryData = await FirestoreService.instance.fetchAll();
+
+        if (retryData.types.isNotEmpty) {
+          await DatabaseService.instance.clearLocalData();
+          for (final type in retryData.types) {
+            await DatabaseService.instance.insertCollectionType(type);
+          }
+          for (final item in retryData.items) {
+            await DatabaseService.instance.insertItem(item);
+          }
+          _collectionTypes = retryData.types;
+          _items = retryData.items;
+        } else {
+          // Truly a new user
+          for (final type in CollectionType.defaults) {
+            await DatabaseService.instance.insertCollectionType(type);
+            await FirestoreService.instance.saveCollectionType(type);
+          }
+          _collectionTypes = List.from(CollectionType.defaults);
+          _items = [];
+        }
+      }
+    } catch (e) {
+      print('Firestore sync error: $e');
+      for (final type in CollectionType.defaults) {
+        await DatabaseService.instance.insertCollectionType(type);
+      }
+      _collectionTypes = List.from(CollectionType.defaults);
+      _items = [];
+    }
   }
 
   // Items
   Future<void> addItem(MediaItem item) async {
-    await DatabaseService.instance.insertItem(item);  // Save to database
-    _items.add(item);                                 // Update in memory
-    notifyListeners();                                // Notify UI
+    await DatabaseService.instance.insertItem(item);
+    await FirestoreService.instance.saveItem(item);
+    _items.add(item);
+    notifyListeners();
   }
 
   Future<void> updateItem(MediaItem updated) async {
     await DatabaseService.instance.updateItem(updated);
+    await FirestoreService.instance.saveItem(updated);
     final index = _items.indexWhere((item) => item.id == updated.id);
     if (index != -1) {
       _items[index] = updated;
@@ -50,6 +98,7 @@ class CollectionProvider extends ChangeNotifier {
 
   Future<void> deleteItem(String id) async {
     await DatabaseService.instance.deleteItem(id);
+    await FirestoreService.instance.deleteItem(id);
     _items.removeWhere((item) => item.id == id);
     notifyListeners();
   }
@@ -57,22 +106,32 @@ class CollectionProvider extends ChangeNotifier {
   // Collection Types
   Future<void> addCollectionType(CollectionType type) async {
     await DatabaseService.instance.insertCollectionType(type);
+    await FirestoreService.instance.saveCollectionType(type);
     _collectionTypes.add(type);
     notifyListeners();
   }
 
+  Future<void> updateCollectionType(CollectionType updated) async {
+    await DatabaseService.instance.updateCollectionType(updated);
+    await FirestoreService.instance.saveCollectionType(updated);
+    final index = _collectionTypes.indexWhere((t) => t.id == updated.id);
+    if (index != -1) {
+      _collectionTypes[index] = updated;
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteCollectionType(String id) async {
     await DatabaseService.instance.deleteCollectionType(id);
+    await FirestoreService.instance.deleteCollectionType(id);
     _collectionTypes.removeWhere((type) => type.id == id);
     _items.removeWhere((item) => item.collectionTypeId == id);
     notifyListeners();
   }
 
   // Stats
-
   int get totalItems => _items.length;
 
-  // Collection Type Stat
   Map<String, int> get countByType {
     final map = <String, int>{};
     for (final item in _items) {
@@ -80,7 +139,7 @@ class CollectionProvider extends ChangeNotifier {
     }
     return map;
   }
-  // Top Genre Stat
+
   Map<String, int> get topGenres {
     final map = <String, int>{};
     for (final item in _items) {
@@ -91,7 +150,7 @@ class CollectionProvider extends ChangeNotifier {
     final sorted = map.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     return Map.fromEntries(sorted.take(5));
   }
-  // Top Decade Stat
+
   Map<String, int> get countByDecade {
     final map = <String, int>{};
     for (final item in _items) {
@@ -101,14 +160,13 @@ class CollectionProvider extends ChangeNotifier {
     final sorted = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     return Map.fromEntries(sorted);
   }
-  // Recently Added Items
+
   List<MediaItem> get recentItems {
     final sorted = List<MediaItem>.from(_items)
       ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
     return sorted.take(5).toList();
   }
 
-  // Filtering Stats
   List<MediaItem> filteredItems(Set<String> typeIds) {
     if (typeIds.isEmpty) return _items;
     return _items.where((item) => typeIds.contains(item.collectionTypeId)).toList();
@@ -153,12 +211,10 @@ class CollectionProvider extends ChangeNotifier {
     return sorted.take(5).toList();
   }
 
-  Future<void> updateCollectionType(CollectionType updated) async {
-    await DatabaseService.instance.updateCollectionType(updated);
-    final index = _collectionTypes.indexWhere((t) => t.id == updated.id);
-    if (index != -1) {
-      _collectionTypes[index] = updated;
-      notifyListeners();
-    }
+  Future<void> clearData() async {
+    await DatabaseService.instance.clearLocalData();
+    _items = [];
+    _collectionTypes = [];
+    notifyListeners();
   }
 }
