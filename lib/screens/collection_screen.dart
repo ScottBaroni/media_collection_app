@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
@@ -195,11 +196,11 @@ class _MediaCard extends StatelessWidget {
             // Cover Art
             Expanded(
               child: item.imagePath != null
-                  ? Image.file(
-                width: double.infinity,
-                fit: BoxFit.cover,
-                Uri.file(item.imagePath!).toFilePath() as dynamic,
-              )
+                ? Image.file(
+                  File(item.imagePath!),
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                )
                   : _PlaceholderArt(emoji: typeEmoji),
             ),
 

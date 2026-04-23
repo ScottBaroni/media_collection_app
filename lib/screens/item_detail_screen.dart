@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
 import '../models/media_item.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ItemDetailScreen extends StatefulWidget {
   final String itemId; // changed from MediaItem item
@@ -16,6 +18,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
   final _formKey = GlobalKey<FormState>();
+  String? _editedImagePath;
 
   late final TextEditingController _titleController;
   late final TextEditingController _creatorController;
@@ -69,7 +72,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       genre: _genreController.text.trim().isEmpty
           ? null
           : _genreController.text.trim(),
-      imagePath: original.imagePath,
+      imagePath: _editedImagePath == null
+          ? original.imagePath
+          : _editedImagePath!.isEmpty ? null : _editedImagePath,
       barcode: original.barcode,
       addedAt: original.addedAt,
     );
@@ -119,8 +124,95 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     _genreController.text = original.genre ?? '';
     setState(() {
       _selectedTypeId = original.collectionTypeId;
+      _editedImagePath = null; // reset image
       _isEditing = false;
     });
+  }
+
+  Future<void> _pickImage() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded),
+              title: const Text('Take a photo'),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 80,
+                );
+                if (image != null) setState(() => _editedImagePath = image.path);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Choose from gallery'),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 80,
+                );
+                if (image != null) setState(() => _editedImagePath = image.path);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.hide_image_outlined),
+              title: const Text('Remove image'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _editedImagePath = '');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoverArt(MediaItem item) {
+    // In edit mode, show the edited image if one was picked
+    final pathToShow = _editedImagePath == null
+        ? item.imagePath
+        : _editedImagePath!.isEmpty ? null : _editedImagePath;
+
+    if (pathToShow != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(File(pathToShow), fit: BoxFit.cover),
+          if (_isEditing)
+            Container(
+              color: Colors.black26,
+              child: const Center(
+                child: Icon(Icons.edit, color: Colors.white, size: 32),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          _isEditing ? Icons.add_photo_alternate_rounded : Icons.image_not_supported_outlined,
+          size: 48,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _isEditing ? 'Add Cover Art' : 'No Image',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -168,18 +260,17 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           padding: const EdgeInsets.all(20),
           children: [
 
-            // Cover Art placeholder
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Center(
-                child: Text(
-                  _emoji(_selectedTypeId ?? ''),
-                  style: const TextStyle(fontSize: 72),
+            // Cover Art
+            GestureDetector(
+              onTap: _isEditing ? _pickImage : null,
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                clipBehavior: Clip.hardEdge,
+                child: _buildCoverArt(item),
               ),
             ),
             const SizedBox(height: 24),

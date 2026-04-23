@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../providers/collection_provider.dart';
 import '../models/media_item.dart';
 
@@ -19,10 +21,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _genreController = TextEditingController();
   String? _selectedTypeId;
   bool _isSaving = false;
+  String? _imagePath;
 
   @override
   void dispose() {
-    // Dispose controllers when the screen is removed
     _titleController.dispose();
     _creatorController.dispose();
     _yearController.dispose();
@@ -30,10 +32,45 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    // Validate form - if any validator returns an error, stop here
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _pickImage() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded),
+              title: const Text('Take a photo'),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 80,
+                );
+                if (image != null) setState(() => _imagePath = image.path);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Choose from gallery'),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 80,
+                );
+                if (image != null) setState(() => _imagePath = image.path);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
 
     final item = MediaItem(
@@ -42,7 +79,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
       title: _titleController.text.trim(),
       creator: _creatorController.text.trim(),
       year: int.parse(_yearController.text.trim()),
-      genre: _genreController.text.trim().isEmpty ? null : _genreController.text.trim(),
+      genre: _genreController.text.trim().isEmpty
+          ? null
+          : _genreController.text.trim(),
+      imagePath: _imagePath,
       addedAt: DateTime.now(),
     );
 
@@ -65,6 +105,43 @@ class _AddItemScreenState extends State<AddItemScreen> {
           padding: const EdgeInsets.all(20),
           children: [
 
+            // Cover Art Picker
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: _imagePath != null
+                    ? Image.file(
+                  File(_imagePath!),
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                )
+                    : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_photo_alternate_rounded,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Add Cover Art',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Collection Type
             DropdownButtonFormField<String>(
               value: _selectedTypeId,
@@ -76,7 +153,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ))
                   .toList(),
               onChanged: (value) => setState(() => _selectedTypeId = value),
-              validator: (value) => value == null ? 'Please select a type' : null,
+              validator: (value) =>
+              value == null ? 'Please select a type' : null,
             ),
             const SizedBox(height: 16),
 
@@ -86,7 +164,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
               decoration: _inputDecoration('Title'),
               textCapitalization: TextCapitalization.words,
               validator: (value) =>
-              value == null || value.trim().isEmpty ? 'Title is required' : null,
+              value == null || value.trim().isEmpty
+                  ? 'Title is required'
+                  : null,
             ),
             const SizedBox(height: 16),
 
@@ -96,7 +176,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
               decoration: _inputDecoration('Artist / Author / Director'),
               textCapitalization: TextCapitalization.words,
               validator: (value) =>
-              value == null || value.trim().isEmpty ? 'Creator is required' : null,
+              value == null || value.trim().isEmpty
+                  ? 'Creator is required'
+                  : null,
             ),
             const SizedBox(height: 16),
 
@@ -106,10 +188,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
               decoration: _inputDecoration('Year'),
               keyboardType: TextInputType.number,
               validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'Year is required';
+                if (value == null || value.trim().isEmpty)
+                  return 'Year is required';
                 final year = int.tryParse(value.trim());
                 if (year == null) return 'Enter a valid year';
-                if (year < 1000 || year > DateTime.now().year) return 'Enter a realistic year';
+                if (year < 1000 || year > DateTime.now().year)
+                  return 'Enter a realistic year';
                 return null;
               },
             ),
@@ -140,7 +224,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
               )
                   : const Text(
                 'Add to Collection',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ],
