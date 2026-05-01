@@ -115,12 +115,12 @@ class ProfileScreen extends StatelessWidget {
             items: [
               _SettingsItem(
                 icon: Icons.upload_file_outlined,
-                label: 'Import from Spreadsheet',
+                label: 'Import from Spreadsheet\n(Coming Soon!)',
                 onTap: () {}, // TODO
               ),
               _SettingsItem(
                 icon: Icons.download_outlined,
-                label: 'Export Collection',
+                label: 'Export Collection\n(Coming Soon!)',
                 onTap: () {}, // TODO
               ),
             ],
